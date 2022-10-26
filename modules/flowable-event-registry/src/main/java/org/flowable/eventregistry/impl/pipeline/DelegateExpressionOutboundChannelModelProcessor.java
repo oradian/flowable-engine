@@ -63,6 +63,7 @@ public class DelegateExpressionOutboundChannelModelProcessor implements ChannelM
         String delegateExpression = channelModel.getAdapterDelegateExpression();
         if (StringUtils.isNotEmpty(delegateExpression)) {
             VariableContainerWrapper variableContainer = new VariableContainerWrapper(Collections.emptyMap());
+            variableContainer.setVariable("tenantId", tenantId);
             variableContainer.setTenantId(tenantId);
             Object channelAdapter = engineConfiguration.getExpressionManager()
                 .createExpression(delegateExpression)
