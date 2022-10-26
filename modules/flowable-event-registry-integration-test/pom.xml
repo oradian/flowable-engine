@@ -6,10 +6,10 @@
     <artifactId>flowable-event-registry-integration-test</artifactId>
 
     <parent>
-        <groupId>org.flowable</groupId>
+        <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-root</artifactId>
         <relativePath>../..</relativePath>
-        <version>6.7.2.32</version>
+        <version>6.7.2.32.1</version>
     </parent>
 
     <properties>
@@ -24,19 +24,19 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-event-registry-spring</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-spring</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-cmmn-spring</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-spring-common</artifactId>
         </dependency>
         <dependency>

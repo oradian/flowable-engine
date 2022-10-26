@@ -6,9 +6,9 @@
   <artifactId>flowable-ui-common</artifactId>
 
   <parent>
-    <groupId>org.flowable</groupId>
+    <groupId>com.oradian.flowable</groupId>
     <artifactId>flowable-ui-parent</artifactId>
-    <version>6.7.2.32</version>
+    <version>6.7.2.32.1</version>
   </parent>
 
   <dependencies>
@@ -31,14 +31,14 @@
 
     <!-- Flowable auto configure in order to pull deprecation properties -->
     <dependency>
-      <groupId>org.flowable</groupId>
+      <groupId>com.oradian.flowable</groupId>
       <artifactId>flowable-spring-boot-autoconfigure</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <!-- Flowable -->
     <dependency>
-      <groupId>org.flowable</groupId>
+      <groupId>com.oradian.flowable</groupId>
       <artifactId>flowable-idm-api</artifactId>
     </dependency>
 
