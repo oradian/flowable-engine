@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +55,7 @@ import org.apache.hc.core5.http.nio.entity.AsyncEntityProducers;
 import org.apache.hc.core5.http.nio.support.AsyncRequestBuilder;
 import org.apache.hc.core5.io.CloseMode;
 import org.apache.hc.core5.io.ModalCloseable;
+import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.util.TimeValue;
 import org.flowable.common.engine.api.FlowableException;
@@ -87,6 +89,10 @@ public class ApacheHttpComponents5FlowableHttpClient implements FlowableAsyncHtt
     protected int connectionRequestTimeout;
 
     public ApacheHttpComponents5FlowableHttpClient(HttpClientConfig config) {
+        this(config, clientBuilder -> {});
+    }
+
+    public ApacheHttpComponents5FlowableHttpClient(HttpClientConfig config, Consumer<HttpAsyncClientBuilder> clientBuilderCustomizer) {
         HttpAsyncClientBuilder httpClientBuilder = HttpAsyncClients.custom();
 
         PoolingAsyncClientConnectionManagerBuilder managerBuilder = PoolingAsyncClientConnectionManagerBuilder.create()
@@ -110,6 +116,7 @@ public class ApacheHttpComponents5FlowableHttpClient implements FlowableAsyncHtt
             retryCount = config.getRequestRetryLimit();
         }
         httpClientBuilder.setRetryStrategy(new DefaultHttpRequestRetryStrategy(retryCount, TimeValue.ZERO_MILLISECONDS));
+        clientBuilderCustomizer.accept(httpClientBuilder);
 
         // system settings
         if (config.isUseSystemProperties()) {
@@ -170,6 +177,15 @@ public class ApacheHttpComponents5FlowableHttpClient implements FlowableAsyncHtt
                 }
                 case "DELETE": {
                     request = AsyncRequestBuilder.delete(uri);
+                    setRequestEntity(requestInfo, request);
+                    break;
+                }
+                case "HEAD": {
+                    request = AsyncRequestBuilder.head(uri);
+                    break;
+                }
+                case "OPTIONS": {
+                    request = AsyncRequestBuilder.options(uri);
                     break;
                 }
                 default: {
@@ -268,12 +284,14 @@ public class ApacheHttpComponents5FlowableHttpClient implements FlowableAsyncHtt
         if (body != null) {
             if (body.isText()) {
                 responseInfo.setBody(body.getBodyText());
+                responseInfo.setBodyBytes(body.getBodyBytes());
             } else {
                 try {
                     // We are creating a fake entity in order to rely on the creation of a String using the EntityUtils
                     // They contain some special logic for picking the default charset based on the content type
                     // (in case the content type doesn't have a charset)
                     responseInfo.setBody(EntityUtils.toString(new ByteArrayEntity(body.getBodyBytes(), body.getContentType())));
+                    responseInfo.setBodyBytes(body.getBodyBytes());
                 } catch (IOException | ParseException e) {
                     throw new FlowableException("Failed to read body");
                 }

@@ -144,7 +144,7 @@ The implementation consists of two classes:
 
 -   An implementation of the *org.flowable.engine.impl.asyncexecutor.JobManager* interface that puts a message on a message queue instead of passing it to the thread pool.
 
--   A *javax.jms.MessageListener* implementation that consumes a message from the message queue, using the job identifier in the message to fetch and execute the job.
+-   A *jakarta.jms.MessageListener* implementation that consumes a message from the message queue, using the job identifier in the message to fetch and execute the job.
 
 First of all, add the *flowable-jms-spring-executor* dependency to your project:
 
@@ -805,7 +805,7 @@ It’s used as follows:
       <flowable:field name="language" stringValue="javascript" />
     </flowable:executionListener>
 
-For examples that demonstrate unsecure scripts and how they are made secure by the *secure scripting* feature, please check the [unit tests on Github](https://github.com/Flowable/Flowable/tree/master/modules/flowable-secure-javascript/src/test/resources)
+For examples that demonstrate unsecure scripts and how they are made secure by the *secure scripting* feature, please check the [unit tests on Github](https://github.com/Flowable/Flowable/tree/main/modules/flowable-secure-javascript/src/test/resources)
 
 ## Logging Sessions \[Experimental\]
 

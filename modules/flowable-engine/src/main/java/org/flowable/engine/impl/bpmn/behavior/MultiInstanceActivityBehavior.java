@@ -168,6 +168,15 @@ public abstract class MultiInstanceActivityBehavior extends FlowNodeActivityBeha
     
     @Override
     public void leave(DelegateExecution execution) {
+        DelegateExecution rootExecution = null;
+        try {
+            rootExecution = getMultiInstanceRootExecution(execution);
+            CommandContextUtil.getProcessEngineConfiguration().getListenerNotificationHelper()
+                    .executeExecutionListeners(activity, rootExecution, ExecutionListener.EVENTNAME_END);
+        } catch (BpmnError error) {
+            ErrorPropagation.propagateError(error, rootExecution);
+            return;
+        }
         cleanupMiRoot(execution);
     }
 
@@ -337,6 +346,13 @@ public abstract class MultiInstanceActivityBehavior extends FlowNodeActivityBeha
     
     @Override
     public void interrupted(DelegateExecution execution) {
+        if (execution.isMultiInstanceRoot()) {
+            // We are only performing the interrupt logic for multi instance root executions
+            internalInterrupted(execution);
+        }
+    }
+
+    protected void internalInterrupted(DelegateExecution execution) {
         if (hasVariableAggregationDefinitions(execution)) {
             Map<String, VariableAggregationDefinition> aggregationsByTarget = groupAggregationsByTarget(execution, aggregations.getOverviewAggregations(),
                     CommandContextUtil.getProcessEngineConfiguration());

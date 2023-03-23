@@ -32,6 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -82,12 +85,9 @@ public class SpringWebClientFlowableHttpClient implements FlowableAsyncHttpClien
             }
         }
 
-        httpClient = httpClient.tcpConfiguration(tcpClient -> {
-            tcpClient = tcpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout());
-            tcpClient = tcpClient.doOnConnected(conn -> conn
-                    .addHandlerLast(new ReadTimeoutHandler(config.getSocketTimeout(), TimeUnit.MILLISECONDS)));
-            return tcpClient;
-        });
+        httpClient = httpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, config.getConnectTimeout())
+                .doOnConnected(conn -> conn
+                        .addHandlerLast(new ReadTimeoutHandler(config.getSocketTimeout(), TimeUnit.MILLISECONDS)));
 
         WebClient.Builder webClientBuilder = WebClient.builder();
         webClientBuilder = webClientBuilder.clientConnector(new ReactorClientHttpConnector(httpClient));
@@ -131,7 +131,17 @@ public class SpringWebClientFlowableHttpClient implements FlowableAsyncHttpClien
                     break;
                 }
                 case "DELETE": {
-                    headersSpec = webClient.delete().uri(uri);
+                    WebClient.RequestBodySpec delete = webClient.method(HttpMethod.DELETE).uri(uri);
+                    setRequestEntity(requestInfo, delete);
+                    headersSpec = delete;
+                    break;
+                }
+                case "HEAD": {
+                    headersSpec = webClient.head().uri(uri);
+                    break;
+                }
+                case "OPTIONS": {
+                    headersSpec = webClient.options().uri(uri);
                     break;
                 }
                 default: {
@@ -208,8 +218,11 @@ public class SpringWebClientFlowableHttpClient implements FlowableAsyncHttpClien
     protected HttpResponse toFlowableHttpResponse(ResponseEntity<ByteArrayResource> response) {
         HttpResponse responseInfo = new HttpResponse();
 
-        responseInfo.setStatusCode(response.getStatusCodeValue());
-        responseInfo.setReason(response.getStatusCode().getReasonPhrase());
+        HttpStatusCode statusCode = response.getStatusCode();
+        responseInfo.setStatusCode(statusCode.value());
+        if (statusCode instanceof HttpStatus httpStatus) {
+            responseInfo.setReason(httpStatus.getReasonPhrase());
+        }
 
         responseInfo.setHttpHeaders(toFlowableHeaders(response.getHeaders()));
 
@@ -223,6 +236,8 @@ public class SpringWebClientFlowableHttpClient implements FlowableAsyncHttpClien
             } else {
                 responseInfo.setBody(new String(bodyBytes));
             }
+
+            responseInfo.setBodyBytes(bodyBytes);
         }
 
         return responseInfo;

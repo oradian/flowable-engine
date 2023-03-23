@@ -43,6 +43,7 @@ import org.flowable.engine.impl.ExecutionQueryImpl;
 import org.flowable.engine.impl.ProcessInstanceQueryImpl;
 import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.flowable.engine.impl.cmmn.CaseInstanceService;
+import org.flowable.engine.impl.delegate.InterruptibleActivityBehaviour;
 import org.flowable.engine.impl.delegate.SubProcessActivityBehavior;
 import org.flowable.engine.impl.history.HistoryManager;
 import org.flowable.engine.impl.persistence.CountingExecutionEntity;
@@ -483,6 +484,16 @@ public class ExecutionEntityManagerImpl
 
         List<ExecutionEntity> childExecutions = collectChildren(execution.getProcessInstance());
         for (ExecutionEntity subExecutionEntity : childExecutions) {
+            // We are treating the deletion of a process instance similar to an interruption
+            // The reason for that is that there might be variables that have to be persisted differently
+            // i.e. nrOfCompletedInstances / nrOfActiveInstance or variable aggregations
+            FlowElement subExecutionFlowElement = subExecutionEntity.getCurrentFlowElement();
+            if (subExecutionFlowElement instanceof FlowNode) {
+                Object behavior = ((FlowNode) subExecutionFlowElement).getBehavior();
+                if (behavior instanceof InterruptibleActivityBehaviour) {
+                    ((InterruptibleActivityBehaviour) behavior).interrupted(subExecutionEntity);
+                }
+            }
             if (subExecutionEntity.isMultiInstanceRoot()) {
                 for (ExecutionEntity miExecutionEntity : subExecutionEntity.getExecutions()) {
                     if (miExecutionEntity.getSubProcessInstance() != null) {
@@ -948,7 +959,7 @@ public class ExecutionEntityManagerImpl
             List<VariableInstanceEntity> variableInstances = engineConfiguration.getVariableServiceConfiguration().getVariableService()
                     .createInternalVariableInstanceQuery()
                     .subScopeId(executionEntity.getId())
-                    .scopeTypes(ScopeTypes.BPMN_DEPENDENT)
+                    .scopeTypes(engineConfiguration.getDependentScopeTypes())
                     .list();
             boolean deleteVariableInstances = !variableInstances.isEmpty();
 
@@ -970,7 +981,7 @@ public class ExecutionEntityManagerImpl
 
             if (deleteVariableInstances) {
                 engineConfiguration.getVariableServiceConfiguration().getVariableInstanceEntityManager()
-                        .deleteBySubScopeIdAndScopeTypes(executionEntity.getId(), ScopeTypes.BPMN_DEPENDENT);
+                        .deleteBySubScopeIdAndScopeTypes(executionEntity.getId(), engineConfiguration.getDependentScopeTypes());
             }
 
         }

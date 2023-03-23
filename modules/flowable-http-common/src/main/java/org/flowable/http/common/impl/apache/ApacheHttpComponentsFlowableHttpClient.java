@@ -16,8 +16,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HostnameVerifier;
@@ -32,9 +34,10 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -51,6 +54,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
@@ -101,6 +105,10 @@ public class ApacheHttpComponentsFlowableHttpClient implements FlowableHttpClien
 
     @SuppressWarnings("unused") // Used by HttpClientConfig determineHttpClient
     public ApacheHttpComponentsFlowableHttpClient(HttpClientConfig config) {
+        this(config, clientBuilder -> {});
+    }
+
+    public ApacheHttpComponentsFlowableHttpClient(HttpClientConfig config, Consumer<HttpClientBuilder> clientBuilderCustomizer) {
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 
         // https settings
@@ -133,6 +141,8 @@ public class ApacheHttpComponentsFlowableHttpClient implements FlowableHttpClien
         if (config.isUseSystemProperties()) {
             httpClientBuilder.useSystemProperties();
         }
+
+        clientBuilderCustomizer.accept(httpClientBuilder);
 
         this.clientBuilder = httpClientBuilder;
 
@@ -178,9 +188,18 @@ public class ApacheHttpComponentsFlowableHttpClient implements FlowableHttpClien
                     break;
                 }
                 case "DELETE": {
-                    request = new HttpDelete(uri);
+                    HttpDeleteWithBody delete = new HttpDeleteWithBody(uri);
+                    setRequestEntity(requestInfo, delete);
+                    request = delete;
                     break;
                 }
+                case "HEAD": {
+                    request = new HttpHead(uri);
+                    break;
+                }
+                case "OPTIONS":
+                    request = new HttpOptions(uri);
+                    break;
                 default: {
                     throw new FlowableException(requestInfo.getMethod() + " HTTP method not supported");
                 }
@@ -268,11 +287,35 @@ public class ApacheHttpComponentsFlowableHttpClient implements FlowableHttpClien
         }
 
         if (response.getEntity() != null) {
-            responseInfo.setBody(EntityUtils.toString(response.getEntity()));
+            byte[] bodyBytes = EntityUtils.toByteArray(response.getEntity());
+            if (bodyBytes != null) {
+                Charset charset = determineCharset(response);
+                responseInfo.setBody(new String(bodyBytes, charset));
+                responseInfo.setBodyBytes(bodyBytes);
+            }
         }
 
         return responseInfo;
 
+    }
+
+    protected Charset determineCharset(CloseableHttpResponse response) {
+        // This is the logic that Apache Http Components does in EntityUtils#toString(HttpEntity)
+        ContentType contentType = ContentType.get(response.getEntity());
+        Charset charset = null;
+        if (contentType != null) {
+            charset = contentType.getCharset();
+            if (charset == null) {
+                ContentType defaultContentType = ContentType.getByMimeType(contentType.getMimeType());
+                charset = defaultContentType != null ? defaultContentType.getCharset() : null;
+            }
+        }
+
+        if (charset == null) {
+            charset = HTTP.DEF_CONTENT_CHARSET;
+        }
+
+        return charset;
     }
 
     protected HttpHeaders getHeaders(Header[] headers) {
@@ -375,6 +418,24 @@ public class ApacheHttpComponentsFlowableHttpClient implements FlowableHttpClien
             } catch (IOException ex) {
                 throw new FlowableException("IO exception occurred", ex);
             }
+        }
+    }
+    
+    /**
+     * A HttpDelete alternative that extends {@link HttpEntityEnclosingRequestBase} to allow DELETE with a request body
+     * 
+     * @author ikaakkola
+     */
+    protected static class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
+
+        public HttpDeleteWithBody(URI uri) {
+            super();
+            setURI(uri);
+        }
+
+        @Override
+        public String getMethod() {
+            return "DELETE";
         }
     }
 }

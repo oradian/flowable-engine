@@ -24,13 +24,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.flowable.common.engine.api.FlowableIllegalArgumentException;
+import org.flowable.common.engine.impl.history.HistoryLevel;
 import org.flowable.engine.delegate.ExecutionListener;
 import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.impl.test.HistoryTestHelper;
 import org.flowable.engine.impl.test.JobTestHelper;
 import org.flowable.engine.impl.test.PluggableFlowableTestCase;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.runtime.ProcessInstanceBuilder;
 import org.flowable.engine.test.Deployment;
+import org.flowable.eventsubscription.api.EventSubscription;
 import org.flowable.examples.bpmn.executionlistener.CurrentActivityExecutionListener.CurrentActivity;
 import org.flowable.examples.bpmn.executionlistener.RecorderExecutionListener.RecordedEvent;
 import org.flowable.job.api.Job;
@@ -39,6 +42,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author Frederik Heremans
+ * @author Filip Hrisafov
  */
 public class ExecutionListenerTest extends PluggableFlowableTestCase {
 
@@ -107,6 +111,108 @@ public class ExecutionListenerTest extends PluggableFlowableTestCase {
                         tuple("noneEvent", "None Event", "Intermediate Catch Event Listener", "end"),
                         tuple("signalEvent", "Signal Event", "Intermediate Throw Event Listener", "start"),
                         tuple("theEnd", "End Event", "End Event Listener", "start")
+                );
+    }
+
+    @Test
+    @Deployment(resources = { "org/flowable/examples/bpmn/executionlistener/ExecutionListenersMultiInstanceSequentialProcess.bpmn20.xml" })
+    public void testExecutionListenersOnSequentialMultiInstance() {
+        RecorderExecutionListener.clear();
+
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("executionListenersProcess")
+                .transientVariable("numberOfIterations", 2)
+                .start();
+        assertProcessEnded(processInstance.getId());
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("theTask", "Start Multi Instance Root", "start"),
+                        tuple("theTask", "Start 0", "start"),
+                        tuple("theTask", "End 0", "end"),
+                        tuple("theTask", "Start 1", "start"),
+                        tuple("theTask", "End 1", "end"),
+                        tuple("theTask", "End Multi Instance Root", "end")
+                );
+    }
+
+    @Test
+    @Deployment(resources = { "org/flowable/examples/bpmn/executionlistener/ExecutionListenersMultiInstanceSequentialProcessAsync.bpmn20.xml" })
+    public void testExecutionListenersOnSequentialMultiInstanceAsync() {
+        RecorderExecutionListener.clear();
+
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("executionListenersProcess")
+                .variable("numberOfIterations", 2)
+                .start();
+        for (int i = 0; i < 2; i++) {
+            Job job = managementService.createJobQuery().processInstanceId(processInstance.getId()).singleResult();
+            managementService.executeJob(job.getId());
+        }
+        assertProcessEnded(processInstance.getId());
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("theTask", "Start Multi Instance Root", "start"),
+                        tuple("theTask", "Start 0", "start"),
+                        tuple("theTask", "End 0", "end"),
+                        tuple("theTask", "Start 1", "start"),
+                        tuple("theTask", "End 1", "end"),
+                        tuple("theTask", "End Multi Instance Root", "end")
+                );
+    }
+
+    @Test
+    @Deployment(resources = { "org/flowable/examples/bpmn/executionlistener/ExecutionListenersMultiInstanceParallelProcess.bpmn20.xml" })
+    public void testExecutionListenersOnParallelMultiInstance() {
+        RecorderExecutionListener.clear();
+
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("executionListenersProcess")
+                .transientVariable("numberOfIterations", 2)
+                .start();
+        assertProcessEnded(processInstance.getId());
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("theTask", "Start Multi Instance Root", "start"),
+                        tuple("theTask", "Start 0", "start"),
+                        tuple("theTask", "End 0", "end"),
+                        tuple("theTask", "Start 1", "start"),
+                        tuple("theTask", "End 1", "end"),
+                        tuple("theTask", "End Multi Instance Root", "end")
+                );
+    }
+
+    @Test
+    @Deployment(resources = { "org/flowable/examples/bpmn/executionlistener/ExecutionListenersMultiInstanceParallelProcessAsync.bpmn20.xml" })
+    public void testExecutionListenersOnParallelMultiInstanceAsync() {
+        RecorderExecutionListener.clear();
+
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("executionListenersProcess")
+                .variable("numberOfIterations", 2)
+                .start();
+        List<Job> jobs = managementService.createJobQuery().processInstanceId(processInstance.getId()).list();
+        jobs.forEach(job -> managementService.executeJob(job.getId()));
+        assertProcessEnded(processInstance.getId());
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("theTask", "Start Multi Instance Root", "start"),
+                        tuple("theTask", "Start 0", "start"),
+                        tuple("theTask", "End 0", "end"),
+                        tuple("theTask", "Start 1", "start"),
+                        tuple("theTask", "End 1", "end"),
+                        tuple("theTask", "End Multi Instance Root", "end")
                 );
     }
 
@@ -345,17 +451,18 @@ public class ExecutionListenerTest extends PluggableFlowableTestCase {
         vars.put("throwErrorStartListener", "MY_ERROR");
 
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("errorHandlingSubProcess", vars);
-        Map<String, Object> processVariables = historyService.createHistoricProcessInstanceQuery()
-                .processInstanceId(processInstance.getId())
-                .includeProcessVariables().singleResult()
-                .getProcessVariables();
-
+        if (HistoryTestHelper.isHistoryLevelAtLeast(HistoryLevel.AUDIT, processEngineConfiguration)) {
+            Map<String, Object> processVariables = historyService.createHistoricProcessInstanceQuery()
+                    .processInstanceId(processInstance.getId())
+                    .includeProcessVariables().singleResult()
+                    .getProcessVariables();
+            assertThat(processVariables)
+                    .containsEntry("handled_error", "MY_ERROR")
+                    .doesNotContainKey("error_code");
+        }
         assertThat(processInstance.getProcessVariables())
                 .containsEntry("handled_error", "MY_ERROR")
                 .doesNotContainKey("_script_task");
-        assertThat(processVariables)
-                .containsEntry("handled_error", "MY_ERROR")
-                .doesNotContainKey("error_code");
     }
 
     @Test
@@ -365,15 +472,17 @@ public class ExecutionListenerTest extends PluggableFlowableTestCase {
         vars.put("throwErrorEndListener", "MY_ERROR");
 
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("errorHandlingSubProcess", vars);
-        Map<String, Object> processVariables = historyService.createHistoricProcessInstanceQuery()
-                .processInstanceId(processInstance.getId())
-                .includeProcessVariables().singleResult()
-                .getProcessVariables();
+        if (HistoryTestHelper.isHistoryLevelAtLeast(HistoryLevel.AUDIT, processEngineConfiguration)) {
+            Map<String, Object> processVariables = historyService.createHistoricProcessInstanceQuery()
+                    .processInstanceId(processInstance.getId())
+                    .includeProcessVariables().singleResult()
+                    .getProcessVariables();
+            assertThat(processVariables)
+                    .containsEntry("handled_error", "MY_ERROR")
+                    .containsEntry("_script_task", "executed");
+        }
 
         assertThat(processInstance.getProcessVariables())
-                .containsEntry("handled_error", "MY_ERROR")
-                .containsEntry("_script_task", "executed");
-        assertThat(processVariables)
                 .containsEntry("handled_error", "MY_ERROR")
                 .containsEntry("_script_task", "executed");
     }
@@ -511,7 +620,6 @@ public class ExecutionListenerTest extends PluggableFlowableTestCase {
     public void testThrowBpmnErrorCatchBoundaryEventSubProcessMultiInstanceParallelStart() {
         {
             // SubProcess ExecutionListener
-            Map<String, Object> vars = new HashMap<>();
             ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder().processDefinitionKey("subProcessErrorHandling")
                     .transientVariable("throwErrorSubProcessStartListener", "EXECUTION_LISTENER_BPMN_ERROR")
                     .transientVariable("elements", Arrays.asList("1", "2", "3"))
@@ -551,7 +659,6 @@ public class ExecutionListenerTest extends PluggableFlowableTestCase {
     public void testThrowBpmnErrorCatchBoundaryEventSubProcessMultiInstanceParallelStartAsync() {
         {
             // SubProcess ExecutionListener
-            Map<String, Object> vars = new HashMap<>();
             ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder().processDefinitionKey("subProcessErrorHandling")
                     .transientVariable("throwErrorSubProcessStartListener", "EXECUTION_LISTENER_BPMN_ERROR")
                     .transientVariable("elements", Arrays.asList("1", "2", "3"))
@@ -579,14 +686,16 @@ public class ExecutionListenerTest extends PluggableFlowableTestCase {
                 }
             });
         }
-        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().includeProcessVariables()
-                .processInstanceId(processInstance.getId()).singleResult();
-        assertThat(historicProcessInstance.getProcessVariables())
-                .containsEntry("error_handled", "true")
-                .containsEntry("startProcessListener_null", "executed")
-                .containsEntry("startProcessListener_1", "executed")
-                .containsEntry("startProcessListener_2", "executed")
-                .doesNotContainKey("endProcessListener_null");
+        if (HistoryTestHelper.isHistoryLevelAtLeast(HistoryLevel.AUDIT, processEngineConfiguration)) {
+            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().includeProcessVariables()
+                    .processInstanceId(processInstance.getId()).singleResult();
+            assertThat(historicProcessInstance.getProcessVariables())
+                    .containsEntry("error_handled", "true")
+                    .containsEntry("startProcessListener_null", "executed")
+                    .containsEntry("startProcessListener_1", "executed")
+                    .containsEntry("startProcessListener_2", "executed")
+                    .doesNotContainKey("endProcessListener_null");
+        }
     }
 
     @Test
@@ -595,7 +704,6 @@ public class ExecutionListenerTest extends PluggableFlowableTestCase {
     public void testThrowBpmnErrorCatchBoundaryEventSubProcessMultiInstanceParallelEndAsync() {
         {
             // SubProcess ExecutionListener
-            Map<String, Object> vars = new HashMap<>();
             ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder().processDefinitionKey("subProcessErrorHandling")
                     .variable("throwErrorSubProcessEndListener", "EXECUTION_LISTENER_BPMN_ERROR")
                     .variable("elements", Arrays.asList("1", "2", "3"))
@@ -612,11 +720,14 @@ public class ExecutionListenerTest extends PluggableFlowableTestCase {
                     }
                 });
             }
-            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().includeProcessVariables()
-                    .processInstanceId(processInstance.getId()).singleResult();
+            if (HistoryTestHelper.isHistoryLevelAtLeast(HistoryLevel.AUDIT, processEngineConfiguration)) {
+                HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().includeProcessVariables()
+                        .processInstanceId(processInstance.getId()).singleResult();
 
-            assertThat(historicProcessInstance.getProcessVariables())
-                    .containsEntry("error_handled", "true");
+                assertThat(historicProcessInstance.getProcessVariables())
+                        .containsEntry("error_handled", "true");
+            }
+
         }
 
         // SubProcess Activity ExecutionListener
@@ -635,16 +746,19 @@ public class ExecutionListenerTest extends PluggableFlowableTestCase {
                 }
             });
         }
-        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().includeProcessVariables()
-                .processInstanceId(processInstance.getId()).singleResult();
-        assertThat(historicProcessInstance.getProcessVariables())
-                .containsEntry("error_handled", "true")
-                .containsEntry("startProcessListener_null", "executed")
-                .containsEntry("startProcessListener_1", "executed")
-                .containsEntry("startProcessListener_2", "executed")
-                .containsEntry("startListener_element_1", "executed")
-                .containsEntry("element_1", "executed")
-                .doesNotContainKey("endProcessListener_null");
+
+        if (HistoryTestHelper.isHistoryLevelAtLeast(HistoryLevel.AUDIT, processEngineConfiguration)) {
+            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().includeProcessVariables()
+                    .processInstanceId(processInstance.getId()).singleResult();
+            assertThat(historicProcessInstance.getProcessVariables())
+                    .containsEntry("error_handled", "true")
+                    .containsEntry("startProcessListener_null", "executed")
+                    .containsEntry("startProcessListener_1", "executed")
+                    .containsEntry("startProcessListener_2", "executed")
+                    .containsEntry("startListener_element_1", "executed")
+                    .containsEntry("element_1", "executed")
+                    .doesNotContainKey("endProcessListener_null");
+        }
     }
 
     @Test
@@ -704,12 +818,404 @@ public class ExecutionListenerTest extends PluggableFlowableTestCase {
         }
     }
 
+    @Test
+    @Deployment
+    public void testExecutionListenersOnTimerBoundary() {
+        RecorderExecutionListener.clear();
 
+        runtimeService.startProcessInstanceByKey("executionListenersProcess");
 
-    // TODO continue adding more test cases
-    /*
-     * Add sequenceFlow executionListener tests?
-     * Add asynchronous multi instance tests
-     * Add test scenario with nested sub-processes
-     */
+        Job timerJob = managementService.createTimerJobQuery().singleResult();
+        assertThat(timerJob).isNotNull();
+        Job job = managementService.moveTimerToExecutableJob(timerJob.getId());
+        managementService.executeJob(job.getId());
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId, RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("boundary", "Start boundary", "start"),
+                        tuple("boundary", "End boundary", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnTimerBoundaryNonInterrupting() {
+        RecorderExecutionListener.clear();
+
+        runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        Job timerJob = managementService.createTimerJobQuery().singleResult();
+        assertThat(timerJob).isNotNull();
+        Job job = managementService.moveTimerToExecutableJob(timerJob.getId());
+        managementService.executeJob(job.getId());
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId, RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("boundary", "Start boundary", "start"),
+                        tuple("boundary", "End boundary", "end")
+                );
+
+        timerJob = managementService.createTimerJobQuery().singleResult();
+        assertThat(timerJob).isNotNull();
+        job = managementService.moveTimerToExecutableJob(timerJob.getId());
+        managementService.executeJob(job.getId());
+
+        recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId, RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("boundary", "Start boundary", "start"),
+                        tuple("boundary", "End boundary", "end"),
+
+                        tuple("boundary", "Start boundary", "start"),
+                        tuple("boundary", "End boundary", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnMessageBoundary() {
+        RecorderExecutionListener.clear();
+
+        runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        EventSubscription eventSubscription = runtimeService.createEventSubscriptionQuery().singleResult();
+        assertThat(eventSubscription).isNotNull();
+        runtimeService.messageEventReceived("testMessage", eventSubscription.getExecutionId());
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId, RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("boundary", "Start boundary", "start"),
+                        tuple("boundary", "End boundary", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnMessageBoundaryNonInterrupting() {
+        RecorderExecutionListener.clear();
+
+        runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        EventSubscription eventSubscription = runtimeService.createEventSubscriptionQuery().singleResult();
+        assertThat(eventSubscription).isNotNull();
+        runtimeService.messageEventReceived("testMessage", eventSubscription.getExecutionId());
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId, RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("boundary", "Start boundary", "start"),
+                        tuple("boundary", "End boundary", "end")
+                );
+
+        eventSubscription = runtimeService.createEventSubscriptionQuery().singleResult();
+        assertThat(eventSubscription).isNotNull();
+        runtimeService.messageEventReceived("testMessage", eventSubscription.getExecutionId());
+
+        recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId, RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("boundary", "Start boundary", "start"),
+                        tuple("boundary", "End boundary", "end"),
+
+                        tuple("boundary", "Start boundary", "start"),
+                        tuple("boundary", "End boundary", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnEventSubProcessTimerStart() {
+        RecorderExecutionListener.clear();
+
+        runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        Job timerJob = managementService.createTimerJobQuery().singleResult();
+        assertThat(timerJob).isNotNull();
+        Job job = managementService.moveTimerToExecutableJob(timerJob.getId());
+        managementService.executeJob(job.getId());
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnEventSubProcessTimerStartNonInterrupting() {
+        RecorderExecutionListener.clear();
+
+        runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        Job timerJob = managementService.createTimerJobQuery().singleResult();
+        assertThat(timerJob).isNotNull();
+        Job job = managementService.moveTimerToExecutableJob(timerJob.getId());
+        managementService.executeJob(job.getId());
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+
+        timerJob = managementService.createTimerJobQuery().singleResult();
+        assertThat(timerJob).isNotNull();
+        job = managementService.moveTimerToExecutableJob(timerJob.getId());
+        managementService.executeJob(job.getId());
+
+        recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end"),
+
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnEventSubProcessMessageStart() {
+        RecorderExecutionListener.clear();
+
+        runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        EventSubscription eventSubscription = runtimeService.createEventSubscriptionQuery().singleResult();
+        assertThat(eventSubscription).isNotNull();
+        runtimeService.messageEventReceived("testMessage", eventSubscription.getExecutionId());
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnEventSubProcessMessageStartNonInterrupting() {
+        RecorderExecutionListener.clear();
+
+        runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        EventSubscription eventSubscription = runtimeService.createEventSubscriptionQuery().singleResult();
+        assertThat(eventSubscription).isNotNull();
+        runtimeService.messageEventReceived("testMessage", eventSubscription.getExecutionId());
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+
+        eventSubscription = runtimeService.createEventSubscriptionQuery().singleResult();
+        assertThat(eventSubscription).isNotNull();
+        runtimeService.messageEventReceived("testMessage", eventSubscription.getExecutionId());
+
+        recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end"),
+
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+    }
+    
+    @Test
+    @Deployment
+    public void testExecutionListenersOnEventSubProcessSignalStart() {
+        RecorderExecutionListener.clear();
+
+        runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        runtimeService.signalEventReceived("testSignal");
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnEventSubProcessSignalStartNonInterrupting() {
+        RecorderExecutionListener.clear();
+
+        runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        runtimeService.signalEventReceived("testSignal");
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+
+        runtimeService.signalEventReceived("testSignal");
+
+        recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end"),
+
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnEventSubProcessVariableStart() {
+        RecorderExecutionListener.clear();
+
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        runtimeService.setVariable(processInstance.getId(), "var1", "test");
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnEventSubProcessVariableStartNonInterrupting() {
+        RecorderExecutionListener.clear();
+
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("executionListenersProcess");
+
+        runtimeService.setVariable(processInstance.getId(), "var1", "test");
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+
+        runtimeService.setVariable(processInstance.getId(), "var1", "test v2");
+
+        recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end"),
+
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnEventSubProcessConditionalStart() {
+        RecorderExecutionListener.clear();
+
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("executionListenersProcess")
+                .variable("myVar", "initial")
+                .start();
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .isEmpty();
+
+        runtimeService.setVariable(processInstance.getId(), "myVar", "test");
+        runtimeService.evaluateConditionalEvents(processInstance.getId());
+
+        recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+    }
+
+    @Test
+    @Deployment
+    public void testExecutionListenersOnEventSubProcessConditionalStartNonInterrupting() {
+        RecorderExecutionListener.clear();
+
+        ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey("executionListenersProcess")
+                .variable("myVar", "initial")
+                .start();
+
+        List<RecordedEvent> recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .isEmpty();
+
+        runtimeService.setVariable(processInstance.getId(), "myVar", "test");
+        runtimeService.evaluateConditionalEvents(processInstance.getId());
+
+        recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+
+        runtimeService.setVariable(processInstance.getId(), "myVar", "test v2");
+        runtimeService.evaluateConditionalEvents(processInstance.getId());
+
+        recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+
+        runtimeService.setVariable(processInstance.getId(), "myVar", "test");
+        runtimeService.evaluateConditionalEvents(processInstance.getId());
+
+        recordedEvents = RecorderExecutionListener.getRecordedEvents();
+        assertThat(recordedEvents)
+                .extracting(RecordedEvent::getActivityId,  RecordedEvent::getParameter, RecordedEvent::getEventName)
+                .containsExactly(
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end"),
+
+                        tuple("startSubProcess", "Start subprocess", "start"),
+                        tuple("startSubProcess", "End subprocess", "end")
+                );
+    }
+
 }
