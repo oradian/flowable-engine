@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-spring-boot-samples</artifactId>
-        <version>6.7.2.32.1</version>
+        <version>6.7.2.32.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>flowable-spring-boot-sample-rest-api</artifactId>
