@@ -534,7 +534,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
 
     public void initInboundEventProcessor() {
         if (this.inboundEventProcessor == null) {
-            this.inboundEventProcessor = new DefaultInboundEventProcessor(eventRegistry);
+            this.inboundEventProcessor = new DefaultInboundEventProcessor(eventRepositoryService, eventRegistry);
         }
         this.eventRegistry.setInboundEventProcessor(this.inboundEventProcessor);
     }

@@ -21,19 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.flowable.eventregistry.api.EventRegistry;
-import org.flowable.eventregistry.api.EventRegistryEvent;
-import org.flowable.eventregistry.api.InboundEvent;
-import org.flowable.eventregistry.api.InboundEventChannelAdapter;
-import org.flowable.eventregistry.api.InboundEventDeserializer;
-import org.flowable.eventregistry.api.InboundEventKeyDetector;
-import org.flowable.eventregistry.api.InboundEventPayloadExtractor;
-import org.flowable.eventregistry.api.InboundEventProcessingPipeline;
-import org.flowable.eventregistry.api.InboundEventTenantDetector;
-import org.flowable.eventregistry.api.InboundEventTransformer;
-import org.flowable.eventregistry.api.OutboundEventChannelAdapter;
-import org.flowable.eventregistry.api.OutboundEventProcessingPipeline;
-import org.flowable.eventregistry.api.OutboundEventSerializer;
+import org.flowable.eventregistry.api.*;
 import org.flowable.eventregistry.api.runtime.EventInstance;
 import org.flowable.eventregistry.api.runtime.EventPayloadInstance;
 import org.flowable.eventregistry.impl.runtime.EventInstanceImpl;
@@ -427,7 +415,7 @@ public class CustomEventProcessingPipelineTest extends AbstractFlowableEventTest
         public AtomicInteger counter = new AtomicInteger(0);
 
         @Override
-        public Collection<EventRegistryEvent> run(InboundChannelModel inboundChannel, InboundEvent rawEvent) {
+        public Collection<EventRegistryEvent> run(EventRepositoryService eventRepositoryService, InboundChannelModel inboundChannel, InboundEvent rawEvent) {
             counter.incrementAndGet();
             return Collections.emptyList();
         }

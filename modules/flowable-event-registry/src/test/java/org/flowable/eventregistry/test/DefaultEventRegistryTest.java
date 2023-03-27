@@ -24,17 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.flowable.eventregistry.api.EventConsumerInfo;
-import org.flowable.eventregistry.api.EventDeployment;
-import org.flowable.eventregistry.api.EventRegistry;
-import org.flowable.eventregistry.api.EventRegistryEvent;
-import org.flowable.eventregistry.api.EventRegistryEventConsumer;
-import org.flowable.eventregistry.api.EventRegistryNonMatchingEventConsumer;
-import org.flowable.eventregistry.api.EventRegistryProcessingInfo;
-import org.flowable.eventregistry.api.InboundEventChannelAdapter;
-import org.flowable.eventregistry.api.InboundEventDeserializer;
-import org.flowable.eventregistry.api.InboundEventKeyDetector;
-import org.flowable.eventregistry.api.InboundEventPayloadExtractor;
+import org.flowable.eventregistry.api.*;
 import org.flowable.eventregistry.api.model.EventPayloadTypes;
 import org.flowable.eventregistry.api.runtime.EventInstance;
 import org.flowable.eventregistry.api.runtime.EventPayloadInstance;
@@ -73,7 +63,7 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
 
         EventRegistry eventRegistry = eventEngineConfiguration.getEventRegistry();
         eventRegistry.registerEventRegistryEventConsumer(this.testEventConsumer);
-        eventRegistry.setInboundEventProcessor(new DefaultInboundEventProcessor(eventRegistry));
+        eventRegistry.setInboundEventProcessor(new DefaultInboundEventProcessor(repositoryService, eventRegistry));
     }
 
     @AfterEach

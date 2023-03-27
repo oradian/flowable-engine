@@ -61,7 +61,7 @@ public class DefaultInboundEventProcessingPipeline<T> implements InboundEventPro
     }
 
     @Override
-    public Collection<EventRegistryEvent> run(InboundChannelModel inboundChannel, InboundEvent inboundEvent) {
+    public Collection<EventRegistryEvent> run(EventRepositoryService eventRepositoryService, InboundChannelModel inboundChannel, InboundEvent inboundEvent) {
 
         T deserializedBody = deserialize(inboundEvent.getBody());
 
