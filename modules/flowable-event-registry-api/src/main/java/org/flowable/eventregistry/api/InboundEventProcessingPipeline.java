@@ -23,5 +23,5 @@ import org.flowable.eventregistry.model.InboundChannelModel;
 public interface InboundEventProcessingPipeline {
 
     Collection<EventRegistryEvent> run(EventRepositoryService eventRepositoryService, InboundChannelModel inboundChannel, InboundEvent inboundEvent);
-    
+
 }

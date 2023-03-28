@@ -14,7 +14,12 @@ package org.flowable.eventregistry.impl;
 
 import java.util.Collection;
 
-import org.flowable.eventregistry.api.*;
+import org.flowable.eventregistry.api.EventRegistry;
+import org.flowable.eventregistry.api.EventRegistryEvent;
+import org.flowable.eventregistry.api.EventRepositoryService;
+import org.flowable.eventregistry.api.InboundEvent;
+import org.flowable.eventregistry.api.InboundEventProcessingPipeline;
+import org.flowable.eventregistry.api.InboundEventProcessor;
 import org.flowable.eventregistry.model.InboundChannelModel;
 
 /**

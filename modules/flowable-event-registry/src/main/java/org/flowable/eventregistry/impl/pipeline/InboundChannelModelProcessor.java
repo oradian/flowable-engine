@@ -70,17 +70,17 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
     public boolean canProcess(ChannelModel channelModel) {
         return channelModel instanceof InboundChannelModel;
     }
-    
+
     @Override
     public boolean canProcessIfChannelModelAlreadyRegistered(ChannelModel channelModel) {
         return channelModel instanceof InboundChannelModel;
     }
 
     @Override
-    public void registerChannelModel(ChannelModel channelModel, String tenantId, EventRegistry eventRegistry, 
+    public void registerChannelModel(ChannelModel channelModel, String tenantId, EventRegistry eventRegistry,
             EventRepositoryService eventRepositoryService,
             boolean fallbackToDefaultTenant) {
-        
+
         if (channelModel instanceof InboundChannelModel) {
             registerChannelModel((InboundChannelModel) channelModel, tenantId, eventRepositoryService,
                     objectMapper, fallbackToDefaultTenant);
@@ -89,13 +89,14 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
 
     protected void registerChannelModel(InboundChannelModel inboundChannelModel, String tenantId, EventRepositoryService eventRepositoryService,
             ObjectMapper objectMapper, boolean fallbackToDefaultTenant) {
-        
+
         if (inboundChannelModel.getInboundEventProcessingPipeline() == null) {
 
             InboundEventProcessingPipeline eventProcessingPipeline;
 
             if (StringUtils.isNotEmpty(inboundChannelModel.getPipelineDelegateExpression())) {
-                eventProcessingPipeline = resolveExpression(tenantId, inboundChannelModel.getPipelineDelegateExpression(), InboundEventProcessingPipeline.class);
+                eventProcessingPipeline = resolveExpression(tenantId, inboundChannelModel.getPipelineDelegateExpression(),
+                        InboundEventProcessingPipeline.class);
             } else if ("json".equals(inboundChannelModel.getDeserializerType())) {
                 eventProcessingPipeline = createJsonEventProcessingPipeline(inboundChannelModel, tenantId, eventRepositoryService, objectMapper);
 
@@ -120,7 +121,7 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
             String tenantId,
             EventRepositoryService eventRepositoryService,
             ObjectMapper objectMapper) {
-        
+
         InboundEventDeserializer<JsonNode> eventDeserializer;
         if (StringUtils.isEmpty(channelModel.getDeserializerDelegateExpression())) {
             eventDeserializer = new StringToJsonDeserializer();
@@ -131,7 +132,8 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
 
         InboundEventTenantDetector<JsonNode> eventTenantDetector = null; // By default no multi-tenancy is applied
 
-        InboundEventPayloadExtractor<JsonNode> eventPayloadExtractor = createInboundEventPayloadExtractor(channelModel, tenantId, JsonFieldToMapPayloadExtractor::new);
+        InboundEventPayloadExtractor<JsonNode> eventPayloadExtractor = createInboundEventPayloadExtractor(channelModel, tenantId,
+                JsonFieldToMapPayloadExtractor::new);
 
         InboundEventTransformer eventTransformer;
         if (StringUtils.isEmpty(channelModel.getEventTransformerDelegateExpression())) {
@@ -158,8 +160,8 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
             eventKeyDetector = resolveExpression(tenantId, keyDetection.getDelegateExpression(), InboundEventKeyDetector.class);
         } else {
             throw new FlowableException(
-                "The channel json key detection value was not found for the channel model with key " + channelModel.getKey()
-                    + ". One of fixedValue, jsonField, jsonPointerExpression or delegateExpression should be set.");
+                    "The channel json key detection value was not found for the channel model with key " + channelModel.getKey()
+                            + ". One of fixedValue, jsonField, jsonPointerExpression or delegateExpression should be set.");
         }
 
         ChannelEventTenantIdDetection channelEventTenantIdDetection = channelModel.getChannelEventTenantIdDetection();
@@ -173,8 +175,8 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
                 eventTenantDetector = resolveExpression(tenantId, channelEventTenantIdDetection.getDelegateExpression(), InboundEventTenantDetector.class);
             } else {
                 throw new FlowableException(
-                    "The channel json tenant detection value was not found for the channel model with key " + channelModel.getKey()
-                        + ". One of fixedValue, jsonPointerExpression, delegateExpression should be set.");
+                        "The channel json tenant detection value was not found for the channel model with key " + channelModel.getKey()
+                                + ". One of fixedValue, jsonPointerExpression, delegateExpression should be set.");
             }
         }
 
@@ -185,7 +187,7 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
     protected InboundEventProcessingPipeline createXmlEventProcessingPipeline(InboundChannelModel channelModel,
             String tenantId,
             EventRepositoryService eventRepositoryService) {
-        
+
         InboundEventDeserializer<Document> eventDeserializer;
         if (StringUtils.isEmpty(channelModel.getDeserializerDelegateExpression())) {
             eventDeserializer = new StringToXmlDocumentDeserializer();
@@ -196,7 +198,8 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
 
         InboundEventTenantDetector<Document> eventTenantDetector = null; // By default no multi-tenancy is applied
 
-        InboundEventPayloadExtractor<Document> eventPayloadExtractor = createInboundEventPayloadExtractor(channelModel, tenantId, XmlElementsToMapPayloadExtractor::new);
+        InboundEventPayloadExtractor<Document> eventPayloadExtractor = createInboundEventPayloadExtractor(channelModel, tenantId,
+                XmlElementsToMapPayloadExtractor::new);
 
         InboundEventTransformer eventTransformer;
         if (StringUtils.isEmpty(channelModel.getEventTransformerDelegateExpression())) {
@@ -221,8 +224,8 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
             eventKeyDetector = resolveExpression(tenantId, keyDetection.getDelegateExpression(), InboundEventKeyDetector.class);
         } else {
             throw new FlowableException(
-                "The channel xml key detection value was not found for the channel model with key " + channelModel.getKey()
-                    + ". One of fixedValue, xmlPathExpression, delegateExpression should be set.");
+                    "The channel xml key detection value was not found for the channel model with key " + channelModel.getKey()
+                            + ". One of fixedValue, xmlPathExpression, delegateExpression should be set.");
         }
 
         ChannelEventTenantIdDetection channelEventTenantIdDetection = channelModel.getChannelEventTenantIdDetection();
@@ -236,13 +239,13 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
                 eventTenantDetector = resolveExpression(tenantId, channelEventTenantIdDetection.getDelegateExpression(), InboundEventTenantDetector.class);
             } else {
                 throw new FlowableException(
-                    "The channel xml tenant detection value was not found for the channel model with key " + channelModel.getKey()
-                        + ". One of fixedValue, xPathExpression, delegateExpression should be set.");
+                        "The channel xml tenant detection value was not found for the channel model with key " + channelModel.getKey()
+                                + ". One of fixedValue, xPathExpression, delegateExpression should be set.");
             }
         }
 
         return new DefaultInboundEventProcessingPipeline<>(eventRepositoryService, eventDeserializer,
-            eventKeyDetector, eventTenantDetector, eventPayloadExtractor, eventTransformer);
+                eventKeyDetector, eventTenantDetector, eventPayloadExtractor, eventTransformer);
     }
 
     protected <T> InboundEventPayloadExtractor<T> createInboundEventPayloadExtractor(InboundChannelModel channelModel,
@@ -261,7 +264,8 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
         Map<String, InboundEventPayloadExtractor<?>> inboundEventPayloadExtractors = engineConfiguration.getInboundEventPayloadExtractorsByChannelType();
         if (inboundEventPayloadExtractors != null && inboundEventPayloadExtractors.containsKey(channelModel.getType())) {
             @SuppressWarnings("unchecked")
-            InboundEventPayloadExtractor<T> channelPayloadExtractor = (InboundEventPayloadExtractor<T>) inboundEventPayloadExtractors.get(channelModel.getType());
+            InboundEventPayloadExtractor<T> channelPayloadExtractor = (InboundEventPayloadExtractor<T>) inboundEventPayloadExtractors.get(
+                    channelModel.getType());
             return new CompositePayloadExtractor<>(Arrays.asList(
                     modelEventPayloadExtractor,
                     configurationPayloadExtractor,
@@ -277,14 +281,14 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
 
     protected InboundEventProcessingPipeline createExpressionEventProcessingPipeline(InboundChannelModel channelModel,
             String tenantId, EventRepositoryService eventRepositoryService, ObjectMapper objectMapper) {
-        
+
         InboundEventDeserializer<?> eventDeserializer;
         if (StringUtils.isNotEmpty(channelModel.getDeserializerDelegateExpression())) {
             eventDeserializer = resolveExpression(tenantId, channelModel.getDeserializerDelegateExpression(), InboundEventDeserializer.class);
         } else {
             throw new FlowableException(
-                "The channel deserializer expression for the channel model with key " + channelModel.getKey()
-                    + " was empty. The deserializerDelegateExpression has to be provided for a channel with an expression deserializer.");
+                    "The channel deserializer expression for the channel model with key " + channelModel.getKey()
+                            + " was empty. The deserializerDelegateExpression has to be provided for a channel with an expression deserializer.");
         }
 
         InboundEventTenantDetector<?> eventTenantDetector = null; // By default no multi-tenancy is applied
@@ -294,8 +298,8 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
             eventPayloadExtractor = resolveExpression(tenantId, channelModel.getPayloadExtractorDelegateExpression(), InboundEventPayloadExtractor.class);
         } else {
             throw new FlowableException(
-                "The channel payload extractor expression for the channel model with key " + channelModel.getKey()
-                    + " was empty. The payloadExtractorExpression has to be provided for a channel with an expression deserializer.");
+                    "The channel payload extractor expression for the channel model with key " + channelModel.getKey()
+                            + " was empty. The payloadExtractorExpression has to be provided for a channel with an expression deserializer.");
         }
 
         InboundEventTransformer eventTransformer;
@@ -324,8 +328,8 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
             eventKeyDetector = new XpathBasedInboundEventKeyDetector(keyDetection.getXmlXPathExpression());
         } else {
             throw new FlowableException(
-                "The channel expression key detection value was not found for the channel model with key " + channelModel.getKey()
-                    + ". One of fixedValue, jsonField, jsonPointerExpression, xmlXPathExpression, delegateExpression should be set.");
+                    "The channel expression key detection value was not found for the channel model with key " + channelModel.getKey()
+                            + ". One of fixedValue, jsonField, jsonPointerExpression, xmlXPathExpression, delegateExpression should be set.");
         }
 
         ChannelEventTenantIdDetection channelEventTenantIdDetection = channelModel.getChannelEventTenantIdDetection();
@@ -340,14 +344,14 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
                 eventTenantDetector = new XpathBasedInboundEventTenantDetector(channelEventTenantIdDetection.getxPathExpression());
             } else {
                 throw new FlowableException(
-                    "The channel expression tenant detection value was not found for the channel model with key " + channelModel.getKey()
-                        + ". One of fixedValue, jsonField, jsonPointerExpression, xmlXPathExpression, delegateExpression should be set.");
+                        "The channel expression tenant detection value was not found for the channel model with key " + channelModel.getKey()
+                                + ". One of fixedValue, jsonField, jsonPointerExpression, xmlXPathExpression, delegateExpression should be set.");
             }
         }
 
         //noinspection unchecked
         return new DefaultInboundEventProcessingPipeline(eventRepositoryService, eventDeserializer,
-            eventKeyDetector, eventTenantDetector, eventPayloadExtractor, eventTransformer);
+                eventKeyDetector, eventTenantDetector, eventPayloadExtractor, eventTransformer);
     }
 
     protected <T> T resolveExpression(String tenantId, String expression, Class<T> type) {
@@ -355,8 +359,8 @@ public class InboundChannelModelProcessor implements ChannelModelProcessor {
         variableContainer.setVariable("tenantId", tenantId);
         variableContainer.setTenantId(tenantId);
         Object value = CommandContextUtil.getEventRegistryConfiguration().getExpressionManager()
-            .createExpression(expression)
-            .getValue(variableContainer);
+                .createExpression(expression)
+                .getValue(variableContainer);
 
         if (type.isInstance(value)) {
             return type.cast(value);
