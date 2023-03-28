@@ -24,7 +24,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.flowable.eventregistry.api.*;
+import org.flowable.eventregistry.api.EventConsumerInfo;
+import org.flowable.eventregistry.api.EventDeployment;
+import org.flowable.eventregistry.api.EventRegistry;
+import org.flowable.eventregistry.api.EventRegistryEvent;
+import org.flowable.eventregistry.api.EventRegistryEventConsumer;
+import org.flowable.eventregistry.api.EventRegistryNonMatchingEventConsumer;
+import org.flowable.eventregistry.api.EventRegistryProcessingInfo;
+import org.flowable.eventregistry.api.InboundEventChannelAdapter;
+import org.flowable.eventregistry.api.InboundEventDeserializer;
+import org.flowable.eventregistry.api.InboundEventKeyDetector;
+import org.flowable.eventregistry.api.InboundEventPayloadExtractor;
 import org.flowable.eventregistry.api.model.EventPayloadTypes;
 import org.flowable.eventregistry.api.runtime.EventInstance;
 import org.flowable.eventregistry.api.runtime.EventPayloadInstance;
@@ -113,7 +123,7 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
                         tuple("payload2", EventPayloadTypes.INTEGER, 123)
                 );
     }
-    
+
     @Test
     public void testFullPayloadPropertyName() {
         TestInboundEventChannelAdapter inboundEventChannelAdapter = setupTestChannel();
@@ -135,15 +145,15 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
         assertThat(eventInstance.getPayloadInstances()).hasSize(1);
         EventPayloadInstance payloadInstance = eventInstance.getPayloadInstances().iterator().next();
         assertThatJson(payloadInstance.getValue())
-            .when(Option.IGNORING_EXTRA_FIELDS)
-            .isEqualTo("{"
-                    + "    type: 'myEvent',"
-                    + "    customerId: 'test',"
-                    + "    payload1: 'Hello World',"
-                    + "    payload2: 123"
-                    + "}");
+                .when(Option.IGNORING_EXTRA_FIELDS)
+                .isEqualTo("{"
+                        + "    type: 'myEvent',"
+                        + "    customerId: 'test',"
+                        + "    payload1: 'Hello World',"
+                        + "    payload2: 123"
+                        + "}");
     }
-    
+
     @Test
     public void testFullPayloadPropertyNameWithCorrelationAndPayload() {
         TestInboundEventChannelAdapter inboundEventChannelAdapter = setupTestChannel();
@@ -165,32 +175,32 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
         assertThat(eventInstance.getEventKey()).isEqualTo("myEvent");
 
         assertThat(eventInstance.getCorrelationParameterInstances())
-            .extracting(EventPayloadInstance::getValue)
-            .containsOnly("test");
+                .extracting(EventPayloadInstance::getValue)
+                .containsOnly("test");
         assertThat(eventInstance.getPayloadInstances())
-            .extracting(EventPayloadInstance::getDefinitionName, EventPayloadInstance::getDefinitionType, EventPayloadInstance::getValue)
-            .contains(
-                    tuple("customerId", EventPayloadTypes.STRING, "test"),
-                    tuple("payload1", EventPayloadTypes.STRING, "Hello World")
-            );
-        
+                .extracting(EventPayloadInstance::getDefinitionName, EventPayloadInstance::getDefinitionType, EventPayloadInstance::getValue)
+                .contains(
+                        tuple("customerId", EventPayloadTypes.STRING, "test"),
+                        tuple("payload1", EventPayloadTypes.STRING, "Hello World")
+                );
+
         EventPayloadInstance payloadInstance = null;
-        
+
         for (EventPayloadInstance eventPayloadInstance : eventInstance.getPayloadInstances()) {
             if ("fullPayload".equalsIgnoreCase(eventPayloadInstance.getDefinitionName())) {
                 payloadInstance = eventPayloadInstance;
             }
         }
-        
+
         assertThat(payloadInstance).isNotNull();
         assertThatJson(payloadInstance.getValue())
-            .when(Option.IGNORING_EXTRA_FIELDS)
-            .isEqualTo("{"
-                    + "    type: 'myEvent',"
-                    + "    customerId: 'test',"
-                    + "    payload1: 'Hello World',"
-                    + "    payload2: 123"
-                    + "}");
+                .when(Option.IGNORING_EXTRA_FIELDS)
+                .isEqualTo("{"
+                        + "    type: 'myEvent',"
+                        + "    customerId: 'test',"
+                        + "    payload1: 'Hello World',"
+                        + "    payload2: 123"
+                        + "}");
     }
 
     @Test
@@ -224,7 +234,7 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
                         tuple("payload2", EventPayloadTypes.INTEGER, 123)
                 );
     }
-    
+
     @Test
     public void testMissingEventConsumer() {
         eventEngineConfiguration.getEventRegistryEventConsumers().remove(testEventConsumer.getConsumerKey());
@@ -232,7 +242,7 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
         eventEngineConfiguration.setNonMatchingEventConsumer(testNonMatchingEventConsumer);
         try {
             TestInboundEventChannelAdapter inboundEventChannelAdapter = setupTestChannel();
-    
+
             repositoryService.createEventModelBuilder()
                     .key("myEvent")
                     .resourceName("myEvent.event")
@@ -240,15 +250,15 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
                     .payload("payload1", EventPayloadTypes.STRING)
                     .payload("payload2", EventPayloadTypes.INTEGER)
                     .deploy();
-    
+
             inboundEventChannelAdapter.triggerTestEvent();
-    
+
             assertThat(testNonMatchingEventConsumer.eventsReceived).hasSize(1);
             FlowableEventRegistryEvent eventRegistryEvent = (FlowableEventRegistryEvent) testNonMatchingEventConsumer.eventsReceived.get(0);
-    
+
             EventInstance eventInstance = eventRegistryEvent.getEventInstance();
             assertThat(eventInstance.getEventKey()).isEqualTo("myEvent");
-    
+
             assertThat(eventInstance.getCorrelationParameterInstances())
                     .extracting(EventPayloadInstance::getValue)
                     .containsOnly("test");
@@ -259,19 +269,19 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
                             tuple("payload1", EventPayloadTypes.STRING, "Hello World"),
                             tuple("payload2", EventPayloadTypes.INTEGER, 123)
                     );
-            
+
         } finally {
             eventEngineConfiguration.setNonMatchingEventConsumer(null);
         }
     }
-    
+
     @Test
     public void testMissingEventConsumerNotCalled() {
         TestNonMatchingEventConsumer testNonMatchingEventConsumer = new TestNonMatchingEventConsumer();
         eventEngineConfiguration.setNonMatchingEventConsumer(testNonMatchingEventConsumer);
         try {
             TestInboundEventChannelAdapter inboundEventChannelAdapter = setupTestChannel();
-    
+
             repositoryService.createEventModelBuilder()
                     .key("myEvent")
                     .resourceName("myEvent.event")
@@ -279,16 +289,16 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
                     .payload("payload1", EventPayloadTypes.STRING)
                     .payload("payload2", EventPayloadTypes.INTEGER)
                     .deploy();
-    
+
             inboundEventChannelAdapter.triggerTestEvent();
-    
+
             assertThat(testNonMatchingEventConsumer.eventsReceived).hasSize(0);
             assertThat(testEventConsumer.eventsReceived).hasSize(1);
             FlowableEventRegistryEvent eventRegistryEvent = (FlowableEventRegistryEvent) testEventConsumer.eventsReceived.get(0);
-    
+
             EventInstance eventInstance = eventRegistryEvent.getEventInstance();
             assertThat(eventInstance.getEventKey()).isEqualTo("myEvent");
-    
+
             assertThat(eventInstance.getCorrelationParameterInstances())
                     .extracting(EventPayloadInstance::getValue)
                     .containsOnly("test");
@@ -299,7 +309,7 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
                             tuple("payload1", EventPayloadTypes.STRING, "Hello World"),
                             tuple("payload2", EventPayloadTypes.INTEGER, 123)
                     );
-            
+
         } finally {
             eventEngineConfiguration.setNonMatchingEventConsumer(null);
         }
@@ -352,14 +362,14 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
 
         });
 
-        inboundEventProcessingPipeline.setInboundEventKeyDetector(new InboundEventKeyDetector<Customer> () {
+        inboundEventProcessingPipeline.setInboundEventKeyDetector(new InboundEventKeyDetector<Customer>() {
 
             @Override
             public String detectEventDefinitionKey(Customer payload) {
                 return payload.getType();
             }
         });
-        
+
         inboundEventProcessingPipeline.setInboundEventPayloadExtractor(new InboundEventPayloadExtractor<Customer>() {
 
             @Override
@@ -438,7 +448,7 @@ public class DefaultEventRegistryTest extends AbstractFlowableEventTest {
             }
         }
     }
-    
+
     private static class TestNonMatchingEventConsumer implements EventRegistryNonMatchingEventConsumer {
 
         public List<EventRegistryEvent> eventsReceived = new ArrayList<>();

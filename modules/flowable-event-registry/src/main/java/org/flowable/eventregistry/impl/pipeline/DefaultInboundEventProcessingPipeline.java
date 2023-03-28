@@ -51,7 +51,7 @@ public class DefaultInboundEventProcessingPipeline<T> implements InboundEventPro
             InboundEventTenantDetector<T> inboundEventTenantDetector,
             InboundEventPayloadExtractor<T> inboundEventPayloadExtractor,
             InboundEventTransformer inboundEventTransformer) {
-        
+
         this.eventRepositoryService = eventRepositoryService;
         this.inboundEventDeserializer = inboundEventDeserializer;
         this.inboundEventKeyDetector = inboundEventKeyDetector;
@@ -66,7 +66,7 @@ public class DefaultInboundEventProcessingPipeline<T> implements InboundEventPro
         T deserializedBody = deserialize(inboundEvent.getBody());
 
         FlowableEventInfo<T> event = new FlowableEventInfoImpl<>(inboundEvent, deserializedBody, inboundChannel);
-        
+
         String eventKey = detectEventDefinitionKey(event);
 
         boolean multiTenant = false;
@@ -76,12 +76,14 @@ public class DefaultInboundEventProcessingPipeline<T> implements InboundEventPro
             multiTenant = true;
         }
 
-        EventModel eventModel = multiTenant ? eventRepositoryService.getEventModelByKey(eventKey, tenantId) : eventRepositoryService.getEventModelByKey(eventKey);
-        
+        EventModel eventModel = multiTenant ?
+                eventRepositoryService.getEventModelByKey(eventKey, tenantId) :
+                eventRepositoryService.getEventModelByKey(eventKey);
+
         EventInstanceImpl eventInstance = new EventInstanceImpl(
-            eventModel.getKey(),
-            extractPayload(eventModel, event),
-            tenantId
+                eventModel.getKey(),
+                extractPayload(eventModel, event),
+                tenantId
         );
 
         return transform(eventInstance);
@@ -102,35 +104,35 @@ public class DefaultInboundEventProcessingPipeline<T> implements InboundEventPro
     public Collection<EventRegistryEvent> transform(EventInstance eventInstance) {
         return inboundEventTransformer.transform(eventInstance);
     }
-    
+
     public InboundEventDeserializer<T> getInboundEventDeserializer() {
         return inboundEventDeserializer;
     }
-    
+
     public void setInboundEventDeserializer(InboundEventDeserializer<T> inboundEventDeserializer) {
         this.inboundEventDeserializer = inboundEventDeserializer;
     }
-    
+
     public InboundEventKeyDetector<T> getInboundEventKeyDetector() {
         return inboundEventKeyDetector;
     }
-    
+
     public void setInboundEventKeyDetector(InboundEventKeyDetector<T> inboundEventKeyDetector) {
         this.inboundEventKeyDetector = inboundEventKeyDetector;
     }
-    
+
     public InboundEventTenantDetector<T> getInboundEventTenantDetector() {
         return inboundEventTenantDetector;
     }
-    
+
     public void setInboundEventTenantDetector(InboundEventTenantDetector<T> inboundEventTenantDetector) {
         this.inboundEventTenantDetector = inboundEventTenantDetector;
     }
-    
+
     public InboundEventPayloadExtractor<T> getInboundEventPayloadExtractor() {
         return inboundEventPayloadExtractor;
     }
-    
+
     public void setInboundEventPayloadExtractor(InboundEventPayloadExtractor<T> inboundEventPayloadExtractor) {
         this.inboundEventPayloadExtractor = inboundEventPayloadExtractor;
     }
@@ -138,7 +140,7 @@ public class DefaultInboundEventProcessingPipeline<T> implements InboundEventPro
     public InboundEventTransformer getInboundEventTransformer() {
         return inboundEventTransformer;
     }
-    
+
     public void setInboundEventTransformer(InboundEventTransformer inboundEventTransformer) {
         this.inboundEventTransformer = inboundEventTransformer;
     }

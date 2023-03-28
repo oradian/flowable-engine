@@ -160,14 +160,14 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
 
     protected Map<String, InboundEventPayloadExtractor<?>> inboundEventPayloadExtractorsByChannelType;
     protected InboundEventPayloadExtractor<?> defaultInboundEventPayloadExtractor;
-    
+
     // Change detection
     protected boolean enableEventRegistryChangeDetection;
     protected long eventRegistryChangeDetectionInitialDelayInMs = 10000L;
     protected long eventRegistryChangeDetectionDelayInMs = 60000L;
     protected EventRegistryChangeDetectionManager eventRegistryChangeDetectionManager;
     protected EventRegistryChangeDetectionExecutor eventRegistryChangeDetectionExecutor;
-    
+
     protected EventRegistryNonMatchingEventConsumer nonMatchingEventConsumer;
 
     protected boolean enableEventRegistryChangeDetectionAfterEngineCreate = true;
@@ -238,7 +238,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
         if (usingRelationalDatabase) {
             initDataSource();
         }
-        
+
         if (usingRelationalDatabase || usingSchemaMgmt) {
             initSchemaManager();
             initSchemaManagementCommand();
@@ -341,7 +341,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
             this.schemaManager = new EventDbSchemaManager();
         }
     }
-    
+
     public void initSchemaManagementCommand() {
         if (schemaManagementCmd == null) {
             if (usingRelationalDatabase && databaseSchemaUpdate != null) {
@@ -421,7 +421,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
     public String getEngineCfgKey() {
         return EngineConfigurationConstants.KEY_EVENT_REGISTRY_CONFIG;
     }
-    
+
     @Override
     public String getEngineScopeType() {
         return ScopeTypes.EVENT_REGISTRY;
@@ -439,7 +439,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
         if (eventParseFactory == null) {
             eventParseFactory = new EventDefinitionParseFactory();
         }
-        
+
         if (channelParseFactory == null) {
             channelParseFactory = new ChannelDefinitionParseFactory();
         }
@@ -462,7 +462,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
                 eventDefinitionCache = new DefaultDeploymentCache<>(eventDefinitionCacheLimit);
             }
         }
-        
+
         if (channelDefinitionCache == null) {
             channelDefinitionCache = new FullDeploymentCache<>();
         }
@@ -498,11 +498,11 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
         if (parsedDeploymentBuilderFactory == null) {
             parsedDeploymentBuilderFactory = new ParsedDeploymentBuilderFactory();
         }
-        
+
         if (parsedDeploymentBuilderFactory.getEventParseFactory() == null) {
             parsedDeploymentBuilderFactory.setEventParseFactory(eventParseFactory);
         }
-        
+
         if (parsedDeploymentBuilderFactory.getChannelParseFactory() == null) {
             parsedDeploymentBuilderFactory.setChannelParseFactory(channelParseFactory);
         }
@@ -510,7 +510,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
         if (eventDeploymentHelper == null) {
             eventDeploymentHelper = new EventDefinitionDeploymentHelper();
         }
-        
+
         if (channelDeploymentHelper == null) {
             channelDeploymentHelper = new ChannelDefinitionDeploymentHelper();
         }
@@ -519,13 +519,13 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
             cachingAndArtifactsManager = new CachingAndArtifactsManager();
         }
     }
-    
+
     public void initInboundChannelModelCacheManager() {
         if (inboundChannelModelCacheManager == null) {
             inboundChannelModelCacheManager = new DefaultInboundChannelModelCacheManager(this);
         }
     }
-    
+
     public void initEventRegistry() {
         if (this.eventRegistry == null) {
             this.eventRegistry = new DefaultEventRegistry(this);
@@ -561,7 +561,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
             this.defaultInboundEventPayloadExtractor = new HeadersPayloadExtractor<>();
         }
     }
-    
+
     public void initChannelDefinitionProcessors() {
         channelModelProcessors.add(new DelegateExpressionInboundChannelModelProcessor(this, objectMapper));
         channelModelProcessors.add(new DelegateExpressionOutboundChannelModelProcessor(this, objectMapper));
@@ -578,7 +578,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
     public void initChangeDetectionExecutor() {
         if (this.eventRegistryChangeDetectionExecutor == null) {
             this.eventRegistryChangeDetectionExecutor = new DefaultEventRegistryChangeDetectionExecutor(eventRegistryChangeDetectionManager,
-                eventRegistryChangeDetectionInitialDelayInMs, eventRegistryChangeDetectionDelayInMs);
+                    eventRegistryChangeDetectionInitialDelayInMs, eventRegistryChangeDetectionDelayInMs);
         }
     }
 
@@ -648,7 +648,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
         this.eventParseFactory = eventParseFactory;
         return this;
     }
-    
+
     @Override
     public EventRegistry getEventRegistry() {
         return eventRegistry;
@@ -690,7 +690,8 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
         return inboundEventPayloadExtractorsByChannelType;
     }
 
-    public EventRegistryEngineConfiguration setInboundEventPayloadExtractorsByChannelType(Map<String, InboundEventPayloadExtractor<?>> inboundEventPayloadExtractorsByChannelType) {
+    public EventRegistryEngineConfiguration setInboundEventPayloadExtractorsByChannelType(
+            Map<String, InboundEventPayloadExtractor<?>> inboundEventPayloadExtractorsByChannelType) {
         this.inboundEventPayloadExtractorsByChannelType = inboundEventPayloadExtractorsByChannelType;
         return this;
     }
@@ -760,6 +761,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
     public EventRegistryChangeDetectionExecutor getEventRegistryChangeDetectionExecutor() {
         return eventRegistryChangeDetectionExecutor;
     }
+
     public EventRegistryEngineConfiguration setEventRegistryChangeDetectionExecutor(EventRegistryChangeDetectionExecutor eventRegistryChangeDetectionExecutor) {
         this.eventRegistryChangeDetectionExecutor = eventRegistryChangeDetectionExecutor;
         return this;
@@ -800,7 +802,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
         this.channelDefinitionCache = channelDefinitionCache;
         return this;
     }
-    
+
     public InboundChannelModelCacheManager getInboundChannelModelCacheManager() {
         return inboundChannelModelCacheManager;
     }
@@ -870,7 +872,7 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
         this.eventDefinitionEntityManager = eventDefinitionEntityManager;
         return this;
     }
-    
+
     public ChannelDefinitionEntityManager getChannelDefinitionEntityManager() {
         return channelDefinitionEntityManager;
     }
@@ -982,7 +984,8 @@ public class EventRegistryEngineConfiguration extends AbstractEngineConfiguratio
         return enableEventRegistryChangeDetectionAfterEngineCreate;
     }
 
-    public EventRegistryEngineConfiguration setEnableEventRegistryChangeDetectionAfterEngineCreate(boolean enableEventRegistryChangeDetectionAfterEngineCreate) {
+    public EventRegistryEngineConfiguration setEnableEventRegistryChangeDetectionAfterEngineCreate(
+            boolean enableEventRegistryChangeDetectionAfterEngineCreate) {
         this.enableEventRegistryChangeDetectionAfterEngineCreate = enableEventRegistryChangeDetectionAfterEngineCreate;
         return this;
     }
