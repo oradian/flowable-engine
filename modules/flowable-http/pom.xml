@@ -7,10 +7,10 @@
     <artifactId>flowable-http</artifactId>
 
     <parent>
-        <groupId>org.flowable</groupId>
+        <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-root</artifactId>
         <relativePath>../..</relativePath>
-        <version>6.8.0</version>
+        <version>6.8.0.1-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -109,7 +109,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-http-common</artifactId>
         </dependency>
         <dependency>
@@ -127,12 +127,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-cmmn-engine</artifactId>
             <scope>test</scope>
         </dependency>

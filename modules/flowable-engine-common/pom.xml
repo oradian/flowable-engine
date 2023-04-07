@@ -8,10 +8,10 @@
     <artifactId>flowable-engine-common</artifactId>
 
     <parent>
-        <groupId>org.flowable</groupId>
+        <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-root</artifactId>
         <relativePath>../..</relativePath>
-        <version>6.8.0</version>
+        <version>6.8.0.1-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -124,15 +124,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-engine-common-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-variable-service-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-event-registry-api</artifactId>
         </dependency>
         <dependency>

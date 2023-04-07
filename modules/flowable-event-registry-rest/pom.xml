@@ -8,10 +8,10 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>org.flowable</groupId>
+        <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-root</artifactId>
         <relativePath>../..</relativePath>
-        <version>6.8.0</version>
+        <version>6.8.0.1-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -91,15 +91,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-event-registry</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-idm-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-common-rest</artifactId>
         </dependency>
 
@@ -139,17 +139,17 @@
 
         <!-- Test dependencies -->
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-idm-spring-configurator</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-spring</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-event-registry-spring-configurator</artifactId>
             <scope>test</scope>
         </dependency>
@@ -237,7 +237,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-spring-security</artifactId>
             <scope>test</scope>
         </dependency>

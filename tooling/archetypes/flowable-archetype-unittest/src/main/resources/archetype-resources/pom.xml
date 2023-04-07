@@ -8,9 +8,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.flowable</groupId>
+			<groupId>com.oradian.flowable</groupId>
 			<artifactId>flowable-engine</artifactId>
-			<version>6.8.0</version>
+			<version>6.8.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

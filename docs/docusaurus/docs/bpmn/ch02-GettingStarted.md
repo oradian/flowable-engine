@@ -64,7 +64,7 @@ Add the following to your *pom.xml* file:
 
     <dependencies>
       <dependency>
-        <groupId>org.flowable</groupId>
+        <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-engine</artifactId>
         <version>6.6.0</version>
       </dependency>

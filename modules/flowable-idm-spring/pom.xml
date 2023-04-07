@@ -7,10 +7,10 @@
     <artifactId>flowable-idm-spring</artifactId>
 
     <parent>
-        <groupId>org.flowable</groupId>
+        <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-root</artifactId>
         <relativePath>../..</relativePath>
-        <version>6.8.0</version>
+        <version>6.8.0.1-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -91,11 +91,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-idm-engine</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-spring-common</artifactId>
         </dependency>
         <dependency>

@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.flowable</groupId>
+        <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-spring-boot-samples</artifactId>
-        <version>6.8.0</version>
+        <version>6.8.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>flowable-spring-boot-sample-actuator</artifactId>
@@ -13,9 +13,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-spring-boot-starter-actuator</artifactId>
-            <version>6.8.0</version>
+            <version>6.8.0.1-SNAPSHOT</version>
         </dependency>
         
         <dependency>

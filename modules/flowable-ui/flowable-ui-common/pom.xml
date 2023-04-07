@@ -1,4 +1,4 @@
-﻿<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -6,9 +6,9 @@
   <artifactId>flowable-ui-common</artifactId>
 
   <parent>
-    <groupId>org.flowable</groupId>
+    <groupId>com.oradian.flowable</groupId>
     <artifactId>flowable-ui-parent</artifactId>
-    <version>6.8.0</version>
+    <version>6.8.0.1-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -31,14 +31,14 @@
 
     <!-- Flowable auto configure in order to pull deprecation properties -->
     <dependency>
-      <groupId>org.flowable</groupId>
+      <groupId>com.oradian.flowable</groupId>
       <artifactId>flowable-spring-boot-autoconfigure</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <!-- Flowable -->
     <dependency>
-      <groupId>org.flowable</groupId>
+      <groupId>com.oradian.flowable</groupId>
       <artifactId>flowable-idm-api</artifactId>
     </dependency>
 

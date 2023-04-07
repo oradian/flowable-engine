@@ -5,9 +5,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>flowable-ui-idm-conf</artifactId>
 	<parent>
-		<groupId>org.flowable</groupId>
+		<groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-ui-parent</artifactId>
-    	<version>6.8.0</version>
+    	<version>6.8.0.1-SNAPSHOT</version>
 	</parent>
 	<packaging>jar</packaging>
 
@@ -23,25 +23,25 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-ui-idm-logic</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-ui-idm-rest</artifactId>
         </dependency>
 
 		<!-- Flowable -->
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-idm-engine</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-idm-spring</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flowable</groupId>
+            <groupId>com.oradian.flowable</groupId>
             <artifactId>flowable-ldap</artifactId>
         </dependency>
 

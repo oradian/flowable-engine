@@ -4,11 +4,11 @@
 
   <name>Flowable DB Clean</name>
   <description>Flowable DB Clean</description>
-  <groupId>org.flowable</groupId>
+  <groupId>com.oradian.flowable</groupId>
   <artifactId>flowable-dbclean</artifactId>
 
   <packaging>pom</packaging>
-  <version>6.8.0</version>
+  <version>6.8.0.1-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
@@ -42,7 +42,7 @@
       <version>8.4-701.jdbc4</version>
     </dependency>
     <dependency>
-      <groupId>org.flowable</groupId>
+      <groupId>com.oradian.flowable</groupId>
       <artifactId>flowable-engine</artifactId>
       <version>${version}</version>
     </dependency>

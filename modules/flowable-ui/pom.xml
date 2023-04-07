@@ -7,10 +7,10 @@
     <packaging>pom</packaging>
 
     <parent>
-        <groupId>org.flowable</groupId>
+        <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-spring-boot</artifactId>
         <relativePath>../flowable-spring-boot/pom.xml</relativePath>
-        <version>6.8.0</version>
+        <version>6.8.0.1-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -52,112 +52,112 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-admin-logic</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-admin-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-admin-conf</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-admin-frontend</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-idm-logic</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-idm-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-idm-conf</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-idm-frontend</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-modeler-logic</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-modeler-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-modeler-conf</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-modeler-frontend</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-task-logic</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-task-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-task-conf</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-ui-task-frontend</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-spring-boot-starter-ui-admin</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-spring-boot-starter-ui-idm</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-spring-boot-starter-ui-modeler</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.flowable</groupId>
+                <groupId>com.oradian.flowable</groupId>
                 <artifactId>flowable-spring-boot-starter-ui-task</artifactId>
                 <version>${project.version}</version>
             </dependency>

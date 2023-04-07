@@ -4,10 +4,10 @@
 	<name>Flowable - DMN JSON Converter</name>
 	<artifactId>flowable-dmn-json-converter</artifactId>
 	<parent>
-		<groupId>org.flowable</groupId>
+		<groupId>com.oradian.flowable</groupId>
 		<artifactId>flowable-root</artifactId>
 		<relativePath>../..</relativePath>
-		<version>6.8.0</version>
+		<version>6.8.0.1-SNAPSHOT</version>
 	</parent>
 	<packaging>jar</packaging>
 	
@@ -19,11 +19,11 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.flowable</groupId>
+			<groupId>com.oradian.flowable</groupId>
 			<artifactId>flowable-engine-common-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.flowable</groupId>
+			<groupId>com.oradian.flowable</groupId>
 			<artifactId>flowable-dmn-model</artifactId>
 		</dependency>
 		<dependency>
