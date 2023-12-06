@@ -10,7 +10,7 @@
         <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-spring-boot</artifactId>
         <relativePath>../flowable-spring-boot/pom.xml</relativePath>
-        <version>6.8.0.1-SNAPSHOT</version>
+        <version>6.8.0.1</version>
     </parent>
 
     <properties>

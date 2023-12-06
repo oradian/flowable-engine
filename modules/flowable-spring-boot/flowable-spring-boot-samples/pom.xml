@@ -7,7 +7,7 @@
         <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-spring-boot</artifactId>
         <relativePath>../</relativePath>
-        <version>6.8.0.1-SNAPSHOT</version>
+        <version>6.8.0.1</version>
     </parent>
 
     <artifactId>flowable-spring-boot-samples</artifactId>

@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.oradian.flowable</groupId>
         <artifactId>flowable-root</artifactId>
-        <version>6.8.0.1-SNAPSHOT</version>
+        <version>6.8.0.1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
